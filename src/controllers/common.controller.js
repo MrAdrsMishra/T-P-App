@@ -32,6 +32,7 @@ const generateAccessAndRefreshTokens = async (userId, role) => {
 };
 
 // Login user
+ 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password, role } = req.body;
 
