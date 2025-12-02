@@ -69,7 +69,7 @@ const deleteStudent = asyncHandler(async (req, res) => {
   if (!deletedStudent) {
     throw new ApiError(404, "Student not found. Deletion failed.");
   }
-
+alert("student deleted successfully")
   return res
     .status(200)
     .json(
@@ -194,7 +194,7 @@ const createdStudents = await Student.insertMany(hashedStudents);
   if (!createdStudents || createdStudents.length === 0) {
     throw new ApiError(500, "Something went wrong while registering");
   }
-
+alert("Student created successfully")
   return res
     .status(201)
     .json(new ApiResponse(201, null, "Students registered successfully"));
