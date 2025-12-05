@@ -29,6 +29,8 @@ app.use(cookieParser())
 import userRouter from './routes/user.routes.js'
 import { link }from 'fs';
 import testRouter from './routes/test.routes.js';
+import practiceSolutionRouter from './routes/practice-solution.routes.js';
 app.use("/v1/user/auth",userRouter)
 app.use("/v1/test",testRouter)
+app.use("/v1/practice",practiceSolutionRouter)
 export {app}
