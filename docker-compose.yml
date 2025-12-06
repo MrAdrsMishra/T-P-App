@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: placement-engine
+    restart: always
+
+    # Environment variables are injected from Render (or your local env)
+    environment:
+      PORT: 5000
+      MONGO_URI: ${mongo_uri}
+      CORS_ORIGIN: ${cors_origin}
+      ACCESS_TOKEN_SECRET: ${access_token_secret}
+      ACCESS_TOKEN_EXPIRY: ${access_token_expiry}
+      REFRESH_TOKEN_SECRET: ${refresh_token_secret}
+      REFRESH_TOKEN_EXPIRY: ${refresh_token_expiry}
+      CLOUDINARY_CLOUDNAME: ${cloudinary_cloudname}
+      CLOUDINARY_APIKEY: ${cloudinary_apikey}
+      CLOUDINARY_APISECRET: ${cloudinary_apisecret}
+
+    # "0" assigns any free port on the host
+    ports:
+      - "0:5000"
+
+    depends_on:
+      - cpp-runner
+      - java-runner
+      - python-runner
+      - go-runner
+      - rust-runner
+      - javascript-runner
+
+    networks:
+      - runner-network
+
+  cpp-runner:
+    image: cpp-runner:latest
+    container_name: cpp-runner
+    restart: always
+    networks:
+      - runner-network
+
+  java-runner:
+    image: java-runner:latest
+    container_name: java-runner
+    restart: always
+    networks:
+      - runner-network
+
+  python-runner:
+    image: python-runner:latest
+    container_name: python-runner
+    restart: always
+    networks:
+      - runner-network
+  go-runner:
+    image: go-runner:latest
+    container_name: go-runner
+    restart: always
+    networks:
+      - runner-network
+
+  javascript-runner:
+    image: javascript-runner:latest
+    container_name: javascript-runner
+    restart: always
+    networks:
+      - runner-network
+
+  rust-runner:
+    image: rust-runner:latest
+    container_name: rust-runner
+    restart: always
+    networks:
+      - runner-network
+
+networks:
+  runner-network:
+    driver: bridge
