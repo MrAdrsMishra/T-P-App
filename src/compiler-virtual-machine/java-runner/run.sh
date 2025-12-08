@@ -9,11 +9,6 @@ if [ -f /app/work/code.java ]; then
   INPUT_PATH="/app/work/input.txt"
   WORK_DIR="/app/work"
   # echo "Using /app/work files"
-elif [ -f /app/code.java ]; then
-  CODE_PATH="/app/code.java"
-  INPUT_PATH="/app/input.txt"
-  WORK_DIR="/app"
-  # echo "Using /app files"
 else
   echo "ERROR: code.java not found in /app/work or /app"
   exit 1

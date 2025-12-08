@@ -9,11 +9,6 @@ if [ -f /app/work/code.rs ]; then
   INPUT_PATH="/app/work/input.txt"
   WORK_DIR="/app/work"
   # echo "Using /app/work files"
-elif [ -f /app/code.rs ]; then
-  CODE_PATH="/app/code.rs"
-  INPUT_PATH="/app/input.txt"
-  WORK_DIR="/app"
-  # echo "Using /app files"
 else
   echo "ERROR: code.rs not found in /app/work or /app"
   exit 1
