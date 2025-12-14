@@ -3,7 +3,7 @@ import path from "path";
 import { exec } from "child_process";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import os from "os";
-import { stderr } from "process";
+import { stderr, stdout } from "process";
 
 export const runCode = async (req, res) => {
   try {
@@ -33,18 +33,14 @@ export const runCode = async (req, res) => {
     const inputFilename = "input.txt";
     const codePath = path.join(tempDir, codeFilename);
     const inputPath = path.join(tempDir, inputFilename);
-    console.log({codeFilename:codeFilename,inputFilename:inputFilename})
     fs.writeFileSync(codePath, userCode || "");
     fs.writeFileSync(inputPath, userInput || "");
-    
+
     // Verify files were created
     const filesInTemp = fs.readdirSync(tempDir);
-    console.log("Files in temp directory:", filesInTemp);
-    console.log("Code file exists:", fs.existsSync(codePath));
-    console.log("Input file exists:", fs.existsSync(inputPath));
 
     const image = images[selectedLanguage];
-    console.log("tempDir: ", tempDir);
+
     const command = `docker run --rm -v "${tempDir}:/app/work" ${image}`;
     exec(
       command,
@@ -53,14 +49,16 @@ export const runCode = async (req, res) => {
         // Always attempt to return both stdout and stderr for debugging
         const out = stdout || null;
         const err = stderr || (error ? error.message : null);
-
-        // Clean up temp dir
+        console.log({
+          codeFilename: codeFilename,
+          inputFilename: inputFilename,
+        });
         try {
           fs.rmSync(tempDir, { recursive: true, force: true });
         } catch (cleanupErr) {
           console.error("Failed to remove temp dir:", cleanupErr);
         }
-        console.log({stdout:out,stderr:err,commandErr:error})
+        console.log({ stdout: out, stderr: err, commandErr: error });
         return res.json({ command, output: out, error: err });
       }
     );
