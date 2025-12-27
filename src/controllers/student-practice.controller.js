@@ -44,8 +44,6 @@ import os from "os";
 export const runCode = async (req, res) => {
   try {
     const { selectedLanguage, userCode, userInput } = req.body;
-    // console.log({ selectedLanguage, userCode, userInput });
-    // create a stable temp directory and write files inside it
     const tmpBase = os.tmpdir();
     const tempDir = fs.mkdtempSync(path.join(tmpBase, "code-run-"));
     const images = {
