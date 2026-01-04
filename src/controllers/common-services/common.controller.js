@@ -1,10 +1,10 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { Admin } from "../models/admin.models.js";
-import { Student } from "../models/student.models.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { Test } from "../models/test.models.js";
-import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { Admin } from "../../models/admin.models.js";
+import { Student } from "../../models/student.models.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { Test } from "../../models/test.models.js";
+import { uploadOnCloudinary } from "../../utils/Cloudinary.js";
 
 // Utility to get the correct model based on role
 const getUserModel = (role) => {

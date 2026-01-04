@@ -1,9 +1,9 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { Admin } from "../models/admin.models.js";
-import { Student } from "../models/student.models.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { Test } from "../models/test.models.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { Admin } from "../../models/admin.models.js";
+import { Student } from "../../models/student.models.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { Test } from "../../models/test.models.js";
 
 const submitTest = asyncHandler(async (req, res) => {
   const { testId, answers } = req.body;

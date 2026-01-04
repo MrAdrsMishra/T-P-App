@@ -1,10 +1,10 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { Admin } from "../models/admin.models.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { Student } from "../models/student.models.js";
-import { Question } from "../models/questions.models.js";
-import { Test } from "../models/test.models.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { Admin } from "../../models/admin.models.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { Student } from "../../models/student.models.js";
+import { Question } from "../../models/questions.models.js";
+import { Test } from "../../models/test.models.js";
 import bcrypt from 'bcrypt'
 
 const registerAdmin = asyncHandler(async (req, res) => {

@@ -1,8 +1,8 @@
 import { Router } from "express";
-import {  checkAdminRole, createProblemSet, deleteStudent,getProblemSet,registerAdmin, registerStudent } from "../controllers/admin.controller.js";
-import {  loginUser, logoutUser, updateUser } from "../controllers/common.controller.js";
 import verifyJwt from "../middleware/auth.middleware.js";
 import { uploadImg } from "../middleware/multer.middleware.js";
+import { checkAdminRole, createProblemSet, deleteStudent, getProblemSet, registerAdmin, registerStudent } from "../controllers/admin-services/admin.controller.js";
+import { loginUser, logoutUser, updateUser } from "../controllers/common-services/common.controller.js";
 
 const userRouter = Router();
 
