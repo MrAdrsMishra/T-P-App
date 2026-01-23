@@ -53,7 +53,7 @@ Best of luck!
 
       try {
         const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent:", info.response);
+        // console.log("Email sent:", info.response);
 
         res.status(200).json({
           success: true,
