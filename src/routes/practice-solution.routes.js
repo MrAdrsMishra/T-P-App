@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { runCode } from "../controllers/student-practice.controller.js";
+import { runCode } from "../controllers/student-services/student-practice.controller.js";
 
 const practiceSolutionRouter = Router();
 

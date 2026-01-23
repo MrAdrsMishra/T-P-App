@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { createProblemSet, createTest } from "../controllers/admin.controller.js";
 import verifyJwt from "../middleware/auth.middleware.js";
-import { getOngoingTestInfo,getOngoingTestData } from "../controllers/common.controller.js";
-import { submitTest } from "../controllers/student.controller.js";
+import { createProblemSet, createTest } from "../controllers/admin-services/admin.controller.js";
+import { getOngoingTestData, getOngoingTestInfo } from "../controllers/common-services/common.controller.js";
+import { submitTest } from "../controllers/student-services/student.controller.js";
 const testRouter = Router();
 
 testRouter.route("/admin/create-test").post(verifyJwt,createTest);// done
