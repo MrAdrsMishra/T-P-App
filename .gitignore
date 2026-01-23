@@ -117,3 +117,10 @@ dist
 .pnp.*
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
+ code-files
+cpp-runner
+java-runner
+javascript-runner
+node_modules
+python-runner
+rust-runner
