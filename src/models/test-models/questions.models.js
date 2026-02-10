@@ -7,9 +7,9 @@ const questionSchema = new mongoose.Schema(
       ref: "Subject",
       required: true,
     },
-    statement: {
+    topic: {
       type: String,
-      required: true,
+      index: true,
     },
     problemStatement: {
       type: String,
@@ -32,7 +32,7 @@ const questionSchema = new mongoose.Schema(
         },
         isCorrect: {
           type: Boolean,
-          default: false, 
+          default: false,
         },
       },
     ],

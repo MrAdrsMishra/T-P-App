@@ -1,9 +1,9 @@
-import { runCodeApi, runCodeService } from "../../services/student-services/student-practice.service";
-import { ApiResponse } from "../../utils/ApiResponse";
-import { asyncHandler } from "../../utils/asyncHandler";
+import { runCodeService } from "../../services/student-services/student-practice.service.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 
 export const runCode = asyncHandler(async (req, res) => {
-  const { sourceCode, language,userInput } = req.body;
-  const res = await runCodeService({ sourceCode, language,userInput});
-  res.send(new ApiResponse(200, res.data, "code executes successfully"));
+  const { sourceCode, language, userInput } = req.body;
+  const result = await runCodeService({ sourceCode, language, userInput });
+  res.send(new ApiResponse(200, result.data, "code executes successfully"));
 });

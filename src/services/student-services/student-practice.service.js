@@ -5,19 +5,28 @@ import {
   getSubmission,
 } from "../Judge0-compiler/run-code.service.js";
 
-export const runCodeNative = async (req, res) => {
+export const runCodeNativeServicec= async(req, res) => {
   try {
     const req_data = req.body;
-    const response = fetch("http://localhost:3000/v1/practice/run-code", {
+    const response = await fetch(`${process.env.COMPILER_API}`, {
+      method: "POST",
       headers: {
-        "content-type": "application/json",
+        Authorization: `Bearer ${process.env.COMPILER_API_SECRET}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(req_data),
     });
-    console.log(response.JSON());
+
+    const data = await response.json();
+    if (!response.ok) {
+      return res
+        .status(response.status || 500)
+        .json(new ApiResponse(response.status || 500, null, data || "compiler error"));
+    }
+
     return res
       .status(200)
-      .json(new ApiResponse(200, response.JSON(), "compiled successfully"));
+      .json(new ApiResponse(200, data, "compiled successfully"));
   } catch (err) {
     console.log(err.message);
     res.status(500).json({ error: err.message });

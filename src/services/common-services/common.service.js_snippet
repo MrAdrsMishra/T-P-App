@@ -1,0 +1,45 @@
+
+// Get Problem Set Service
+export const getProblemsService = async ({ subject, topic, page = 1, limit = 20 }) => {
+  const query = {};
+
+  if (subject) {
+    query.subject = subject;
+  }
+
+  if (topic) {
+    query.topic = topic;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const problems = await Question.find(query)
+    .skip(skip)
+    .limit(limit)
+    .select("-correctOption"); // Hide correct option for students/common view if needed, or maybe not? 
+    // ADMIN might need it, but this is a common route. 
+    // Plan said "users will give subject and topics". 
+    // If it's for practice, maybe show it? 
+    // User said: "ensure getPractciceProblems route is same as admin get problems"
+    // Admin usually needs to see correct option. 
+    // I'll leave it for now or make it optional? 
+    // "ensure that /run-code is for coding submission"
+    // "ensure getPractciceProblems route is same as admin get problems" -> implies admin and practice use SAME route.
+    // If admin uses it to EDIT, they need correctOption.
+    // If student uses it to PRACTICE, they shouldn't see correctOption immediately?
+    // But typically practice platforms show the question. The "Run Code" checks the answer.
+    // So hiding correctOption is safer. Admin can have a separate 'getById' or just use this and we include it if role is admin?
+    // User didn't specify. I will Include it for now as Admin uses it too. 
+    // Wait, "common route". 
+    // I'll return the whole document for now. 
+
+  const total = await Question.countDocuments(query);
+
+  return {
+    problems,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+};

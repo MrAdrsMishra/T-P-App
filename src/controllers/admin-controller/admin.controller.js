@@ -5,10 +5,16 @@ import {
   registerAdminService,
   deleteStudentService,
   createProblemSetService,
-  getProblemSetService,
   registerStudentService,
   createTestService,
+  createResourceService,
+  createAssignmentService,
+  getQueryService,
+  responseQueryService,
+  getStudentProjectsDetailService,
+  getAnalyticsService,
 } from "../../services/admin-services/admin.service.js";
+import { getProblems } from "../common-controller/common.controller.js";
 
 // Register Admin Controller
 const registerAdmin = asyncHandler(async (req, res) => {
@@ -47,15 +53,6 @@ const deleteStudent = asyncHandler(async (req, res) => {
       )
     );
 });
-
-// Check Admin Role Middleware
-const checkAdminRole = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied. Admins only." });
-  }
-  next();
-};
-
 // Create Problem Set Controller
 const createProblemSet = asyncHandler(async (req, res) => {
   const problems = req.body;
@@ -69,9 +66,9 @@ const createProblemSet = asyncHandler(async (req, res) => {
 
 // Get Problem Set Controller
 const getProblemSet = asyncHandler(async (req, res) => {
-  const { subject } = req.body;
+  const { subject,topics=[]} = req.body;
 
-  const problems = await getProblemSetService(subject);
+  const problems = await getProblems({subject,topics});
 
   return res
     .status(200)
@@ -103,30 +100,55 @@ const createTest = asyncHandler(async (req, res) => {
 });
 
 const createResource=asyncHandler(async(req,res)=>{
-    await createResourceService
+    const {title,description,url,type,category,tags}=req.body
+    await createResourceService({title,description,url,type,category,tags})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Resource created successfully"));
 })
 const createAssignment=asyncHandler(async(req,res)=>{
-    await createAssignmentService
+  const {title,deadline,task,subject}= req.body;
+    await createAssignmentService({title,deadline,task,subject})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Assignment created successfully"));
 })
 const getQuery=asyncHandler(async(req,res)=>{
-    await getQueryService
+    const queries=await getQueryService()
+    return res
+    .status(200)
+    .json(new ApiResponse(200, queries, "Queries retrieved successfully"));
 })
 const responseQuery=asyncHandler(async(req,res)=>{
-    await responseQueryService
+    const {queryId,response}=req.body
+    await responseQueryService({queryId,response})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Query responded successfully"));
 })
-const getStudentDetails=asyncHandler(async(req,res)=>{
-    await getStudentDetailsService
+const getStudentAnalytics=asyncHandler(async(req,res)=>{
+  const {studentId}=req.body
+    const students=await getStudentAnalyticsService({studentId})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, students, "Students retrieved successfully"));
 })
 const getStudentProjectsDetail=asyncHandler(async(req,res)=>{
-    await getStudentProjectsDetailService
+    const {studentId}=req.body
+    const projects=await getStudentProjectsDetailService({studentId})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, projects, "Projects retrieved successfully"));
 })
 const getAnalytics=asyncHandler(async(req,res)=>{
-    await getAnalyticsService
+    const analytics=await getAnalyticsService()
+    return res
+    .status(200)
+    .json(new ApiResponse(200, analytics, "Analytics retrieved successfully"));
 })
 export {
   registerAdmin,
   deleteStudent,
-  checkAdminRole,
   createProblemSet,
   getProblemSet,
   registerStudent,
@@ -135,7 +157,7 @@ export {
   createAssignment,
   getQuery,
   responseQuery,
-  getStudentDetails,
+  getStudentAnalytics,
   getStudentProjectsDetail,
   getAnalytics,
 };

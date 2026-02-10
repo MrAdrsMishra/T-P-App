@@ -1,6 +1,6 @@
-import { Student } from "../../models/student.models.js";
+import { Student } from "../../models/user-models/student.models.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { Test } from "../../models/test.models.js";
+import { Test } from "../../models/test-models/test.models.js";
 
 // Submit Test Service
 export const submitTestService = async (testId, answers, studentId) => {
@@ -77,8 +77,8 @@ export const getOngoingTestDataService = async (testId) => {
 
   return testData;
 };
-export const submitSolutionService = async () => {};
-export const getAnalyticsService = async () => {};
-export const submitQueryService = async () => {};
-export const getResourcesService = async () => {};
-export const getTestHistoryService = async () => {};
+export const submitSolutionService = async () => { };
+export const getAnalyticsService = async () => { };
+export const submitQueryService = async () => { };
+export const getResourcesService = async () => { };
+export const getTestHistoryService = async () => { };

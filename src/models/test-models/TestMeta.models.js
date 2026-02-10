@@ -43,5 +43,10 @@ const TestMetaSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  status: {
+    type: String,
+    enum: ["ONGOING", "ENDED", "UPCOMING"],
+    default: "UPCOMING",
+  },
 });
 export const TestMeta = mongoose.model("TestMeta", TestMetaSchema);

@@ -33,24 +33,10 @@ const testSchema = new mongoose.Schema({
     required: true,
     default: 30,
   },
-  totalQuestions: {
-    type: Number,
-    required: true,
-    default: 20,
-  },
-  totalMarks: {
-    type: Number,
-    required: true,
-    default: 100,
-  },
+  // Meta information (questions, totals, stats) moved to TestMeta
   validTill: {
     type: Date,
     required: true,
-  },
-  status: {
-    type: String,
-    enum: ["ONGOING", "ENDED", "UPCOMING"],
-    default: "UPCOMING",
   },
 }, { timestamps: true });
 

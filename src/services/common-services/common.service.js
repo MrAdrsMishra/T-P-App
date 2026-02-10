@@ -1,8 +1,11 @@
-import { Admin } from "../../models/admin.models.js";
-import { Student } from "../../models/student.models.js";
+import { Admin } from "../../models/user-models/admin.models.js";
+import { Student } from "../../models/user-models/student.models.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { Test } from "../../models/test.models.js";
+import { Test } from "../../models/test-models/test.models.js";
 import { uploadOnCloudinary } from "../../utils/Cloudinary.js";
+import { Question } from "../../models/test-models/questions.models.js";
+import { TestMeta } from "../../models/test-models/TestMeta.models.js";
+import { Subject } from "../../models/test-models/subject.models.js";
 
 // Utility to get the correct model based on role
 const getUserModel = (role) => {
@@ -30,7 +33,7 @@ const generateAccessAndRefreshTokens = async (userId, role) => {
 };
 
 // Login User Service
-export const loginUserService = async (email, password, role) => {
+const loginUserService = async (email, password, role) => {
   if (!email || !password) {
     throw new ApiError(400, "Email and password are required");
   }
@@ -64,7 +67,7 @@ export const loginUserService = async (email, password, role) => {
 };
 
 // Logout User Service
-export const logoutUserService = async (userId, role) => {
+const logoutUserService = async (userId, role) => {
   const Model = getUserModel(role);
 
   await Model.findByIdAndUpdate(
@@ -77,8 +80,19 @@ export const logoutUserService = async (userId, role) => {
 };
 
 // Update User Service
-export const updateUserService = async (userId, updatedData, photoBuffer) => {
-  const { mobile, email, username, batch, branch, github, leetcode, gfg, linkedin, about } = updatedData;
+const updateUserService = async (userId, updatedData, photoBuffer) => {
+  const {
+    mobile,
+    email,
+    username,
+    batch,
+    branch,
+    github,
+    leetcode,
+    gfg,
+    linkedin,
+    about,
+  } = updatedData;
 
   const currentUser = await Student.findById(userId);
   if (!currentUser) {
@@ -91,7 +105,10 @@ export const updateUserService = async (userId, updatedData, photoBuffer) => {
   }
 
   // Validate email
-  if (email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+  if (
+    email &&
+    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
+  ) {
     throw new ApiError(400, "Email is invalid");
   }
 
@@ -102,7 +119,10 @@ export const updateUserService = async (userId, updatedData, photoBuffer) => {
       const result = await uploadOnCloudinary(photoBuffer);
       profilePicUrl = result?.secure_url || result;
     } catch (error) {
-      throw new ApiError(500, "Something went wrong while uploading on cloudinary");
+      throw new ApiError(
+        500,
+        "Something went wrong while uploading on cloudinary"
+      );
     }
   }
 
@@ -133,4 +153,194 @@ export const updateUserService = async (userId, updatedData, photoBuffer) => {
   }
 
   return updatedUser;
+};
+
+// Get Problem Set Service
+const getProblemsService = async ({ subject, topic, page = 1, limit = 20 }) => {
+  const query = {};
+
+  if (subject) {
+    query.subject = subject;
+  }
+
+  if (topic) {
+    query.topic = topic;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const problems = await Question.find(query).skip(skip).limit(limit);
+
+  const total = await Question.countDocuments(query);
+
+  return {
+    problems,
+    total,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    totalPages: Math.ceil(total / limit),
+  };
+};
+
+// Provides ongoing test info tailored to requester role (student/admin)
+const getOngoingTestInfoService =  (async({ page = 1, limit = 20 } = {}, user = null)  => {
+  const skip = (page - 1) * limit;
+  const now = new Date();
+
+  // Default: return tests whose validTill is in future
+  const testQuery = { validTill: { $gt: now } };
+
+  // Fetch tests (basic fields)
+  const tests = await Test.find(testQuery)
+    .select("title description duration validTill createdBy forBranch forBatch")
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  const total = await Test.countDocuments(testQuery);
+
+  const role = user?.role;
+
+  if (role === "student") {
+    // For each test, attach its TestMeta.problems (questions) and totalMarks and subjects
+    const results = await Promise.all(
+      tests.map(async (t) => {
+        const meta = await TestMeta.findOne({ testId: t._id })
+          .populate({ path: "problems", select: "subjectId topic allocatedMark problemStatement questionType" })
+          .populate({ path: "subjects", select: "subjectName" })
+          .lean();
+
+        return {
+          testId: t._id,
+          title: t.title,
+          description: t.description,
+          duration: t.duration,
+          validTill: t.validTill,
+          subjects: meta?.subjects || [],
+          questions: meta?.problems || [],
+          totalMarks: meta?.totalMarks ?? null,
+        };
+      })
+    );
+
+    return {
+      results,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  if (role === "admin") {
+    // Admins get TestMeta summary info
+    const metas = await TestMeta.find({ testId: { $in: tests.map((t) => t._id) } })
+      .populate({ path: "testId", select: "title createdAt validTill" })
+      .populate({ path: "subjects", select: "subjectName" })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const results = metas.map((m) => ({
+      testId: m.testId?._id || m.testId,
+      title: m.testId?.title || null,
+      createdAt: m.testId?.createdAt || null,
+      validTill: m.testId?.validTill || null,
+      totalParticipants: m.totalParticipents,
+      status: m.status,
+      subjects: m.subjects || [],
+      averageScore: m.averageScore,
+      highestScore: m.highestScore,
+    }));
+
+    return {
+      results,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total: metas.length,
+      totalPages: Math.ceil(metas.length / limit),
+    };
+  }
+
+  // Default (unauthenticated or unknown role): return basic test info
+  const basic = tests.map((t) => ({
+    testId: t._id,
+    title: t.title,
+    description: t.description,
+    duration: t.duration,
+    validTill: t.validTill,
+  }));
+
+  return {
+    results: basic,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    total,
+    totalPages: Math.ceil(total / limit),
+  };
+});
+
+// Provides detailed test data; accepts { testId } and requester `user` to tailor response
+const getOngoingTestDataService =  (async ({ testId } = {}, user = null) => {
+  if (!testId) {
+    throw new ApiError(400, "testId query parameter is required");
+  }
+
+  const role = user?.role;
+
+  const test = await Test.findById(testId).select("title description duration validTill createdBy forBranch forBatch createdAt").lean();
+  if (!test) throw new ApiError(404, "Test not found");
+
+  const meta = await TestMeta.findOne({ testId: test._id })
+    .populate({ path: "problems", select: "subjectId topic allocatedMark problemStatement questionType" })
+    .populate({ path: "subjects", select: "subjectName" })
+    .lean();
+
+  if (role === "student") {
+    return {
+      testId: test._id,
+      title: test.title,
+      description: test.description,
+      duration: test.duration,
+      validTill: test.validTill,
+      subjects: meta?.subjects || [],
+      questions: meta?.problems || [],
+      totalMarks: meta?.totalMarks ?? null,
+    };
+  }
+
+  if (role === "admin") {
+    return {
+      testId: test._id,
+      title: test.title,
+      createdAt: test.createdAt,
+      validTill: test.validTill,
+      totalParticipants: meta?.totalParticipents ?? 0,
+      status: meta?.status || "UPCOMING",
+      subjects: meta?.subjects || [],
+      averageScore: meta?.averageScore ?? 0,
+      highestScore: meta?.highestScore ?? 0,
+      totalMarks: meta?.totalMarks ?? null,
+    };
+  }
+
+  // Default: return student-like view
+  return {
+    testId: test._id,
+    title: test.title,
+    description: test.description,
+    duration: test.duration,
+    validTill: test.validTill,
+    subjects: meta?.subjects || [],
+    questions: meta?.problems || [],
+    totalMarks: meta?.totalMarks ?? null,
+  };
+});
+
+export {
+  loginUserService,
+  logoutUserService,
+  updateUserService,
+  getProblemsService,
+  getOngoingTestInfoService,
+  getOngoingTestDataService,
 };

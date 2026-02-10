@@ -5,6 +5,9 @@ import {
   loginUserService,
   logoutUserService,
   updateUserService,
+  getProblemsService,
+  getOngoingTestInfoService,
+  getOngoingTestDataService,
 } from "../../services/common-services/common.service.js";
 // Login Controller
 const loginUser = asyncHandler(async (req, res) => {
@@ -63,4 +66,35 @@ const updateUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, updatedUser, "Profile updated successfully"));
 });
-export { loginUser, logoutUser, updateUser };
+
+// Get Problems Controller
+const getProblems = asyncHandler(async (req, res) => {
+  const { subject, topic, page, limit } = req.query;
+
+  const problems = await getProblemsService({
+    subject,
+    topic,
+    page: parseInt(page) || 1,
+    limit: parseInt(limit) || 20,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, problems, "Problems retrieved successfully"));
+});
+const getOngoingTestInfo = asyncHandler(async (req, res) => {
+  const { page, limit } = req.query;
+  const ongoingTest = await getOngoingTestInfoService({ page, limit }, req.user);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, ongoingTest, "Ongoing test retrieved successfully"));
+});
+const getOngoingTestData = asyncHandler(async (req, res) => {
+  const { page, limit, testId } = req.query;
+  const ongoingTest = await getOngoingTestDataService({ page, limit, testId }, req.user);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, ongoingTest, "Ongoing test retrieved successfully"));
+});
+
+export { loginUser, logoutUser, updateUser, getProblems, getOngoingTestInfo,getOngoingTestData };

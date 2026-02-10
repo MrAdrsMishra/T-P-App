@@ -1,12 +1,12 @@
-import { Admin } from "../../models/admin.models.js";
+import { Admin } from "../../models/user-models/admin.models.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { Student } from "../../models/student.models.js";
-import { Question } from "../../models/questions.models.js";
-import { Test } from "../../models/test.models.js";
+import { Student } from "../../models/user-models/student.models.js";
+import { Question } from "../../models/test-models/questions.models.js";
+import { Test } from "../../models/test-models/test.models.js";
 import bcrypt from "bcrypt";
 
 // Register Admin
-export const registerAdminService = async (fullName, email, password, role) => {
+const registerAdminService = async (fullName, email, password, role) => {
   // Check if any field is empty
   if (
     [fullName, email, password, role].some(
@@ -44,7 +44,7 @@ export const registerAdminService = async (fullName, email, password, role) => {
 };
 
 // Delete Student
-export const deleteStudentService = async (studentName) => {
+const deleteStudentService = async (studentName) => {
   if (!studentName) {
     throw new ApiError(400, "Student ID is required.");
   }
@@ -62,7 +62,7 @@ export const deleteStudentService = async (studentName) => {
 };
 
 // Create Problem Set
-export const createProblemSetService = async (problems) => {
+const createProblemSetService = async (problems) => {
   if (!Array.isArray(problems) || problems.length === 0) {
     throw new ApiError(400, "Request body must be a non-empty array");
   }
@@ -71,6 +71,7 @@ export const createProblemSetService = async (problems) => {
   for (const problem of problems) {
     if (
       !problem.subject?.trim() ||
+      !problem.topic?.trim() ||
       !problem.problemStatement?.trim() ||
       !problem.options?.trim() ||
       !problem.correctOption?.trim() ||
@@ -89,12 +90,13 @@ export const createProblemSetService = async (problems) => {
 
   // Insert into database
   for (const problem of problems) {
-    const { subject, problemStatement, options, correctOption, allocatedMark } =
+    const { subject, topic, problemStatement, options, correctOption, allocatedMark } =
       problem;
     const newOptions = options.split(",").map((opt) => opt.trim());
 
     await Question.create({
       subject,
+      topic,
       problemStatement,
       options: newOptions,
       correctOption,
@@ -104,15 +106,8 @@ export const createProblemSetService = async (problems) => {
 
   return { message: "Problems created successfully" };
 };
-
-// Get Problem Set
-export const getProblemSetService = async (subject) => {
-  const problems = await Question.find({ subject });
-  return problems;
-};
-
 // Register Students
-export const registerStudentService = async (students) => {
+const registerStudentService = async (students) => {
   if (!Array.isArray(students) || students.length === 0) {
     throw new ApiError(400, "Request body must be a non-empty array");
   }
@@ -174,7 +169,7 @@ export const registerStudentService = async (students) => {
 };
 
 // Create Test
-export const createTestService = async (testData) => {
+const createTestService = async (testData) => {
   if (!testData) {
     throw new ApiError(400, "Test data is required");
   }
@@ -243,40 +238,55 @@ export const createTestService = async (testData) => {
   const newTest = await Test.create({
     title: testData.title,
     subjects: testData.categories,
-    for_branch: testData.for_branch,
-    for_batch: testData.for_batch,
+    forBranch: testData.for_branch,
+    forBatch: testData.for_batch,
     duration: testData.duration,
-    valid_till: validTillDate,
-    total_marks: testData.total_marks || 100,
-    problems: questionIds,
+    validTill: validTillDate,
+    totalMarks: testData.total_marks || 100,
+    questions: questionIds,
     description: testData.description,
-    instructions: testData.instructions,
-    total_questions: testData.numberOfQuestions,
+    instruction: testData.instructions,
+    totalQuestions: testData.numberOfQuestions,
+    status: "UPCOMING"
   });
 
   return newTest;
 };
 
-export const createResourceService = async ({ requestAnimationFrame }) => {
+const createResourceService = async () => {
   return {};
 };
-export const createAssignmentService = async ({ requestAnimationFrame }) => {
+const createAssignmentService = async ({ requestAnimationFrame }) => {
   return {};
 };
-export const getQueryService = async ({ requestAnimationFrame }) => {
+const getQueryService = async ({ requestAnimationFrame }) => {
   return {};
 };
-export const responseQueryService = async ({ requestAnimationFrame }) => {
+const responseQueryService = async ({ requestAnimationFrame }) => {
   return {};
 };
-export const getStudentDetailsService = async ({ requestAnimationFrame }) => {
+const getStudentAnalyticsService = async ({ studentId }) => {
   return {};
 };
-export const getStudentProjectsDetailService = async ({
-  requestAnimationFrame,
+const getStudentProjectsDetailService = async ({
+  studentId,
 }) => {
   return {};
 };
-export const getAnalyticsService = async ({ requestAnimationFrame }) => {
+const getAnalyticsService = async ({ requestAnimationFrame }) => {
   return {};
 };
+export {
+  registerAdminService,
+  deleteStudentService,
+  createProblemSetService,
+  registerStudentService,
+  createTestService,
+  createResourceService,
+  createAssignmentService,
+  getQueryService,
+  responseQueryService,
+  getStudentAnalyticsService,
+  getStudentProjectsDetailService,
+  getAnalyticsService
+}
