@@ -13,6 +13,9 @@ import {
   responseQueryService,
   getStudentProjectsDetailService,
   getAnalyticsService,
+  getTestAnalyticsService,
+  getTotalTestAnalyticsService,
+  getTotalResourcesAnalyticsService,
 } from "../../services/admin-services/admin.service.js";
 import { getProblems } from "../common-controller/common.controller.js";
 
@@ -141,23 +144,48 @@ const getStudentProjectsDetail=asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200, projects, "Projects retrieved successfully"));
 })
 const getAnalytics=asyncHandler(async(req,res)=>{
-    const analytics=await getAnalyticsService()
+  const batch= req.query.batch || new Date().getFullYear()
+    const analytics=await getAnalyticsService({batch})
     return res
     .status(200)
     .json(new ApiResponse(200, analytics, "Analytics retrieved successfully"));
 })
+const getTestAnalytics=asyncHandler(async(req,res)=>{
+  const {testId}=req.params
+    const analytics= await getTestAnalyticsService(testId)
+    return res
+    .status(200)
+    .json(new ApiResponse(200, analytics, "Test Analytics retrieved successfully"));
+})
+const getTotalTestAnalytics=asyncHandler(async(req,res)=>{
+  const {batch,branch}=req.query
+    const analytics= await getTotalTestAnalyticsService({batch,branch})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, analytics, "Test Analytics retrieved successfully"));
+})
+const getTotalResourcesAnalytics=asyncHandler(async(req,res)=>{
+  const batch= req.query.batch || new Date().getFullYear()
+    const analytics= await getTotalResourcesAnalyticsService({batch})
+    return res
+    .status(200)
+    .json(new ApiResponse(200, analytics, "Resources Analytics retrieved successfully"));
+})
 export {
-  registerAdmin,
-  deleteStudent,
-  createProblemSet,
-  getProblemSet,
-  registerStudent,
-  createTest,
-  createResource,
-  createAssignment,
-  getQuery,
-  responseQuery,
-  getStudentAnalytics,
-  getStudentProjectsDetail,
-  getAnalytics,
+  registerAdmin, // req.body
+  deleteStudent, // req.body
+  createProblemSet, // req.body
+  getProblemSet, // req.body
+  registerStudent, // req.body
+  createTest, // req.body
+  createResource, // req.body
+  createAssignment, // req.body
+  getQuery, // req.body
+  responseQuery, // req.body
+  getStudentAnalytics, // req.body
+  getStudentProjectsDetail, // req.body
+  getAnalytics, // req.query
+  getTestAnalytics, // req.params
+  getTotalTestAnalytics, // req.query
+  getTotalResourcesAnalytics, // req.query
 };

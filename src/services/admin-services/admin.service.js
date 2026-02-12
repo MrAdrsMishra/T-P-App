@@ -4,6 +4,8 @@ import { Student } from "../../models/user-models/student.models.js";
 import { Question } from "../../models/test-models/questions.models.js";
 import { Test } from "../../models/test-models/test.models.js";
 import bcrypt from "bcrypt";
+import { TestAttempt } from "../../models/test-models/testAttempts.models.js";
+import { Resource } from "../../models/test-models/resource.models.js";
 
 // Register Admin
 const registerAdminService = async (fullName, email, password, role) => {
@@ -273,9 +275,151 @@ const getStudentProjectsDetailService = async ({
 }) => {
   return {};
 };
-const getAnalyticsService = async ({ requestAnimationFrame }) => {
-  return {};
+
+const getAnalyticsService = async (filters = {}) => {
+  const { batch } = filters;
+  const matchStage = {};
+  if (batch) matchStage.batch = batch;
+
+  // Total Students
+  const totalStudents = await Student.countDocuments(matchStage);
+
+  // Active Tests (validTill > now)
+  const activeTests = await Test.countDocuments({
+    validTill: { $gt: new Date() },
+    ...(batch && { forBatch: batch }),
+  });
+
+  // Avg Score
+  const avgScoreResult = await Student.aggregate([
+    { $match: matchStage },
+    { $group: { _id: null, avg: { $avg: "$avgScore" } } },
+  ]);
+  const avgScore = avgScoreResult[0]?.avg || 0;
+
+  // Completion Rate
+  const totalTestsForBatch = await Test.countDocuments({
+    ...(batch && { forBatch: batch }),
+  });
+
+  const studentStats = await Student.aggregate([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: null,
+        totalTestAppeared: { $sum: "$totalTestAppeared" },
+      },
+    },
+  ]);
+  const totalAppeared = studentStats[0]?.totalTestAppeared || 0;
+
+  const completionRate =
+    totalTestsForBatch > 0 && totalStudents > 0
+      ? ((totalAppeared / (totalStudents * totalTestsForBatch)) * 100).toFixed(
+        2
+      )
+      : 0;
+
+  // Top Performers
+  const topPerformers = await Student.find(matchStage)
+    .sort({ avgScore: -1 })
+    .limit(20)
+    .select("fullName email avgScore totalTestAppeared photo");
+
+  // Recent Activities (from Test Attempts)
+  const recentAttempts = await TestAttempt.find({})
+    .sort({ updatedAt: -1 })
+    .limit(5)
+    .populate("studentId", "fullName")
+    .populate("testId", "title");
+
+  const recentActivities = recentAttempts.map((attempt) => ({
+    student: attempt.studentId?.fullName || "Unknown",
+    action: `Completed ${attempt.testId?.title || "Test"}`,
+    time: attempt.updatedAt,
+    score: attempt.testScore + "%",
+  }));
+
+  // If few activities, maybe add some recent tests created by admin? 
+  // For now simplest is just attempts.
+
+  return {
+    totalStudents,
+    activeTests,
+    avgScore: parseFloat(avgScore.toFixed(2)),
+    completionRate,
+    topPerformers,
+    recentActivities,
+  };
 };
+const getTestAnalyticsService = async (testId) => {
+  if (!testId) {
+    throw new ApiError(400, "Test ID is required")
+  }
+  const test = await Test.findById(testId)
+  if (!test) {
+    throw new ApiError(404, "Test not found")
+  }
+  const testAttempts = await TestAttempt.find({ testId })
+  if (!testAttempts) {
+    throw new ApiError(404, "Test attempts not found")
+  }
+  const totalStudents = testAttempts.length
+  const totalScore = testAttempts.reduce((acc, attempt) => acc + attempt.testScore, 0)
+  const avgScore = totalScore / totalStudents
+  const topPerformers = testAttempts.sort((a, b) => b.testScore - a.testScore).slice(0, 10)
+  return {
+    test,
+    testAttempts,
+    totalStudents,
+    totalScore,
+    avgScore,
+    topPerformers
+  }
+}
+const getTotalTestAnalyticsService = async (filter = {}) => {
+  const { batch, branch } = filter // if brancch not provided in filter then it will fetch all tests
+  const tests = await Test.aggregate([
+    {
+      $match: {
+        forBatch: batch,
+        ...(branch && { forBranch: branch })
+      }
+    }
+  ])
+  if (!tests) {
+    throw new ApiError(404, "Tests not found")
+  }
+  const totalTests = tests.length
+  const totalScore = tests.reduce((acc, test) => acc + test.testScore, 0)
+  const avgScore = totalScore / totalTests
+  const topPerformers = tests.sort((a, b) => b.testScore - a.testScore).slice(0, 10)
+  return {
+    tests,
+    totalTests,
+    totalScore,
+    avgScore,
+    topPerformers
+  }
+}
+const getTotalResourcesAnalyticsService = async (filter = {}) => {
+  const { batch } = filter
+  const resources = await Resource.find({batch})
+  if (!resources) {
+    throw new ApiError(404, "Resources not found")
+  }
+  const totalResources = resources.length
+  const totalScore = resources.reduce((acc, resource) => acc + resource.resourceScore, 0)
+  const avgScore = totalScore / totalResources
+  const topPerformers = resources.sort((a, b) => b.resourceScore - a.resourceScore).slice(0, 10)
+  return {
+    resources,
+    totalResources,
+    totalScore,
+    avgScore,
+    topPerformers
+  }
+}
 export {
   registerAdminService,
   deleteStudentService,
@@ -288,5 +432,8 @@ export {
   responseQueryService,
   getStudentAnalyticsService,
   getStudentProjectsDetailService,
-  getAnalyticsService
+  getAnalyticsService,
+  getTestAnalyticsService,
+  getTotalTestAnalyticsService,
+  getTotalResourcesAnalyticsService
 }

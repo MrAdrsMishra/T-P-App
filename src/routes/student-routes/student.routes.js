@@ -1,10 +1,13 @@
 import { Router } from "express";
 import {
+  getResources,
+  getTestHistory,
+  submitQuery,
+  submitSolution,
   submitTest,
-  getOngoingTestInfo,
-  getOngoingTestData,
 } from "../../controllers/student-controller/student.controller.js";
- import verifyJwt  from "../../middleware/auth.middleware.js";
+ import {verifyJwt}  from "../../middleware/auth.middleware.js";
+import { getAnalytics } from "../../controllers/admin-controller/admin.controller.js";
 const studentRouter = Router();
 
 studentRouter.route("/submit-test-data").post(verifyJwt, submitTest);

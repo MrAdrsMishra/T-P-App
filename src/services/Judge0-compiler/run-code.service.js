@@ -3,15 +3,14 @@ import axios from "axios";
 import base64 from "base-64";
 
 
-const client = axios.create({
-  baseURL: process.env.JUDGE0_BASE_URL,
+const client = axios.create({ 
+  baseURL: process.env.RAPID_API_URL,
   headers: {
-    "x-rapidapi-key": process.env.JUDGE0-API-KEY,
-    "x-rapidapi-host": process.env.JUDGE0-API-HOST,
+    "x-rapidapi-key": process.env.RAPID_API_KEY,
+    "x-rapidapi-host": process.env.RAPID_API_HOST,
     "Content-Type": "application/json",
   },
 });
-
 /* -----------------------------------------------------------
    Helper — Encode Base64 if required
 ----------------------------------------------------------- */
