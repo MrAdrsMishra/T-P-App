@@ -1,8 +1,18 @@
 import mongoose from "mongoose";
+
 const testSchema = new mongoose.Schema({
+<<<<<<< HEAD:src/models/test.models.js
+=======
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
+    required: true,
+  },
+>>>>>>> 49f3765113c383968e62e1364af65830e1d48d81:src/models/test-models/test.models.js
   title: {
     type: String,
     required: true,
+    trim: true,
   },
   description: {
     type: String,
@@ -11,35 +21,27 @@ const testSchema = new mongoose.Schema({
   instruction: {
     type: String,
   },
-  for_branch: [{
+  forBranch: [{
     type: String,
     required: true,
-    enum: ["AIML","CSE","EC","EX","DS","CY","AIDS","BS"],
-    index:true,
+    enum: ["AIML", "CSE", "EC", "EX", "DS", "CY", "AIDS", "BS"],
+    index: true,
   }],
-  for_batch: {
+  forBatch: {
     type: String,
     default: () => new Date().getFullYear().toString(),
   },
   duration: {
     type: Number,
     required: true,
-    default: 30
+    default: 30,
   },
-  total_questions: {
-    type: Number,
-    required: true,
-    default: 20
-  },
-  total_marks: {
-    type: Number,
-    required: true,
-    default: 100
-  },
-  valid_till: {
+  // Meta information (questions, totals, stats) moved to TestMeta
+  validTill: {
     type: Date,
     required: true,
   },
+<<<<<<< HEAD:src/models/test.models.js
  
 }, { timestamps: true });
 const testSubjectSchema = new mongoose.Schema({
@@ -67,6 +69,8 @@ const testQuestionsSchema = new mongoose.Schema({
     require:true
    }
  
+=======
+>>>>>>> 49f3765113c383968e62e1364af65830e1d48d81:src/models/test-models/test.models.js
 }, { timestamps: true });
 
 export const Test = mongoose.model('Test', testSchema);

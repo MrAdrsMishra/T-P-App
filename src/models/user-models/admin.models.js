@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+//  adminid string pk
+//   fullName string 
+//   email string 
+//   password string 
+//   phone string 
+//   collegeId string 
+//   Role string 
+//   subject string
+//   refreshToken string 
+//   timestamp date
 const adminSchema = new mongoose.Schema({
   fullName: {
     type: String,
@@ -24,12 +34,13 @@ const adminSchema = new mongoose.Schema({
     // required:true,
     trim:true
   },
-  college_id: {
+  collegeId: {
     type:String,
     // required:true
   },
-  subject:[{
-    type:String,
+  subjects: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Subject',
   }],
   role:{
     type:String,

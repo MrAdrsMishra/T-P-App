@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { Admin } from "../models/admin.models.js";
-import { Student } from "../models/student.models.js";
+import { Admin } from "../models/user-models/admin.models.js";
+import { Student } from "../models/user-models/student.models.js";
 
 const verifyJwt = asyncHandler(async (req, res, next) => {
   // Get the token from cookies or headers
@@ -25,26 +25,26 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
       user = await Admin.findById(decodedToken._id);
     } else if (decodedToken.role === "Student") {
       user = await Student.findById(decodedToken._id);
-    } 
+    }
     // provede role model not exist
     else {
       return res
-      .status(403)
-      .json(
-        {
-        message: "Invalid role, access denied",
-        }
-    );
+        .status(403)
+        .json(
+          {
+            message: "Invalid role, access denied",
+          }
+        );
     }
     // user not find in specified model
     if (!user) {
       return res
-      .status(404)
-      .json(
-        {
-        message: "User not found, access denied",
-        }
-    );
+        .status(404)
+        .json(
+          {
+            message: "User not found, access denied",
+          }
+        );
     }
 
     // Attach the user and role to the request object
@@ -54,13 +54,21 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
     next();
   } catch (error) {
     return res
-    .status(401)
-    .json(
-        { 
-            message: "Invalid token, access denied" 
+      .status(401)
+      .json(
+        {
+          message: "Invalid token, access denied"
         }
-    );
+      );
   }
 });
 
-export default verifyJwt;
+
+const checkAdminRole = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Access denied. Admins only." });
+  }
+  next();
+};
+
+export { verifyJwt, checkAdminRole };

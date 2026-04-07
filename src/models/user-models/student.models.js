@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 const studentSchema = new mongoose.Schema(
   {
     fullName: {
@@ -8,8 +8,8 @@ const studentSchema = new mongoose.Schema(
       required: [true, "Full name is required"],
       trim: true,
     },
-    about_yourself:{
-      type:String,
+    about: {
+      type: String,
     },
     password: {
       type: String,
@@ -26,12 +26,6 @@ const studentSchema = new mongoose.Schema(
         "Please provide a valid email address",
       ],
     },
-    // store social links as key-value pairs, e.g. { linkedin: 'https://...', leetcode: 'https://...' }
-    social_links: {
-      type: Map,
-      of: String,
-      default: {}
-    },
     phone: {
       type: String,
       trim: true,
@@ -42,8 +36,8 @@ const studentSchema = new mongoose.Schema(
       match: [/\d{4}[A-Z]{2}\d{6}$/, "Enrollment number is required"],
       unique: true,
       trim: true,
-      required:true,
-      index:true
+      required: true,
+      index: true,
     },
     branch: {
       type: String,
@@ -53,54 +47,61 @@ const studentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    role:{
-      type:String,
-      default:"Student"
+    role: {
+      type: String,
+      default: "Student",
     },
     photo: {
       type: String,
     },
-    total_tests_appeared: {
+    totalTestAppeared: {
       type: Number,
       default: 0,
     },
-    average_score: {
+    avgScore: {
       type: Number,
       default: 0,
     },
-    last_test_date: {
+    lastTestDate: {
       type: Date,
       default: null,
+    },
+    hasProjects: {
+      type: Boolean,
+      default: false,
+    },
+    refreshToken: {
+      type: String,
     },
   },
   { timestamps: true }
 );
 
-studentSchema.pre("save", async function (next){
-  // if not modified 
-  if(!this.isModified("password"))return next();
+studentSchema.pre("save", async function (next) {
+  // if not modified
+  if (!this.isModified("password")) return next();
 
   // if ask to modified
-  this.password = await bcrypt.hash(this.password,10)
-  next()
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
-studentSchema.methods.isPasswordCorrect = async function (requestPassword)  {
+studentSchema.methods.isPasswordCorrect = async function (requestPassword) {
   return await bcrypt.compare(requestPassword, this.password);
 };
-studentSchema.methods.generateAccessToken = function() {
+studentSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
       email: this.email,
       fullName: this.fullName,
-      role:this.role
+      role: this.role,
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
   );
 };
-studentSchema.methods.generateRefreshToken = function() {
+studentSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
       _id: this._id,
