@@ -290,10 +290,53 @@ const getOngoingTestDataService =  (async ({ testId } = {}, user = null) => {
   const test = await Test.findById(testId).select("title description duration validTill createdBy forBranch forBatch createdAt").lean();
   if (!test) throw new ApiError(404, "Test not found");
 
-  const meta = await TestMeta.findOne({ testId: test._id })
-    .populate({ path: "problems", select: "subjectId topic allocatedMark problemStatement questionType" })
+  let meta = await TestMeta.findOne({ testId: test._id })
+    .populate({
+      path: "problems",
+      select: "_id subjectId topic allocatedMark problemStatement questionType options",
+      populate: {
+        path: "options.optionId",
+        select: "optionValue"
+      }
+    })
     .populate({ path: "subjects", select: "subjectName" })
     .lean();
+
+  // Debug logging
+  console.log(`[getOngoingTestDataService] testId: ${testId}`);
+  console.log(`[getOngoingTestDataService] TestMeta found:`, meta ? "YES" : "NO");
+
+  // If TestMeta doesn't exist, create it with empty problems
+  if (!meta) {
+    console.log(`[getOngoingTestDataService] Creating TestMeta for test: ${testId}`);
+    try {
+      meta = await TestMeta.create({
+        testId: test._id,
+        problems: [],
+        subjects: [],
+        totalMarks: 0,
+        status: "UPCOMING",
+        averageScore: 0,
+        highestScore: 0,
+        totalParticipents: 0,
+      });
+      console.log(`[getOngoingTestDataService] TestMeta created successfully`);
+    } catch (error) {
+      console.error(`[getOngoingTestDataService] Error creating TestMeta:`, error.message);
+      // Set default meta object if creation fails
+      meta = {
+        problems: [],
+        subjects: [],
+        totalMarks: 0,
+        status: "UPCOMING",
+      };
+    }
+  }
+
+  if (meta) {
+    console.log(`[getOngoingTestDataService] Problems count:`, meta.problems?.length || 0);
+    console.log(`[getOngoingTestDataService] Subjects count:`, meta.subjects?.length || 0);
+  }
 
   if (role === "student") {
     return {
@@ -303,7 +346,7 @@ const getOngoingTestDataService =  (async ({ testId } = {}, user = null) => {
       duration: test.duration,
       validTill: test.validTill,
       subjects: meta?.subjects || [],
-      questions: meta?.problems || [],
+      problems: meta?.problems || [],
       totalMarks: meta?.totalMarks ?? null,
     };
   }
@@ -331,7 +374,7 @@ const getOngoingTestDataService =  (async ({ testId } = {}, user = null) => {
     duration: test.duration,
     validTill: test.validTill,
     subjects: meta?.subjects || [],
-    questions: meta?.problems || [],
+    problems: meta?.problems || [],
     totalMarks: meta?.totalMarks ?? null,
   };
 });

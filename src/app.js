@@ -35,7 +35,7 @@ import practiceSolutionRouter from "./routes/practice-routes/practice-solution.r
 // starting of any api
 app.use('/api/v1/admin', adminRouter)
 app.use('/api/v1/student', studentRouter)
-app.use('/api/v1/user', commonRouter)
+app.use('/api/v1/user/auth', commonRouter)
 app.use('/api/v1/practice', practiceSolutionRouter)
 // app.use('/api/v1/test', testRouter)
 export { app }

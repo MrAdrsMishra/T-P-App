@@ -3,6 +3,8 @@ import { ApiError } from "../../utils/ApiError.js";
 import { Student } from "../../models/user-models/student.models.js";
 import { Question } from "../../models/test-models/questions.models.js";
 import { Test } from "../../models/test-models/test.models.js";
+import { TestMeta } from "../../models/test-models/TestMeta.models.js";
+import { Subject } from "../../models/test-models/subject.models.js";
 import bcrypt from "bcrypt";
 import { TestAttempt } from "../../models/test-models/testAttempts.models.js";
 import { Resource } from "../../models/test-models/resource.models.js";
@@ -251,6 +253,24 @@ const createTestService = async (testData) => {
     totalQuestions: testData.numberOfQuestions,
     status: "UPCOMING"
   });
+
+  // Create TestMeta to link problems with the test
+  const subjectIds = await Subject.find({ subjectName: { $in: testData.categories } }).select("_id").lean();
+  const subjectIdList = subjectIds.map((s) => s._id);
+
+  const testMeta = await TestMeta.create({
+    testId: newTest._id,
+    problems: questionIds,
+    subjects: subjectIdList,
+    totalMarks: testData.total_marks || 100,
+    status: "UPCOMING",
+    averageScore: 0,
+    highestScore: 0,
+    totalParticipents: 0,
+  });
+
+  console.log(`[createTestService] Test created with ${questionIds.length} problems`);
+  console.log(`[createTestService] TestMeta created successfully`);
 
   return newTest;
 };
