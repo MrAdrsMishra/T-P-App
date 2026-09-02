@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="PlacementEngineDB" id="Project-placement-engine" database="MongoDb" >
+	<schema name="placement_engine" >
+		<!-- STUDENT MODEL -->
+		<table name="Student" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="fullName" type="string" jt="12" mandatory="y" />
+			<column name="about" type="string" jt="12" />
+			<column name="password" type="string" jt="12" mandatory="y" />
+			<column name="email" type="string" jt="12" mandatory="y" />
+			<column name="phone" type="string" jt="12" />
+			<column name="enrollment" type="string" jt="12" mandatory="y" />
+			<column name="course" type="string" jt="12" />
+			<column name="stream" type="string" jt="12" />
+			<column name="branch" type="string" jt="12" />
+			<column name="batch" type="string" jt="12" />
+			<column name="role" type="string" jt="12" />
+			<column name="photo" type="string" jt="12" />
+			<column name="totalTestAppeared" type="int" jt="4" />
+			<column name="avgScore" type="double" jt="8" />
+			<column name="lastTestDate" type="date" jt="91" />
+			<column name="hasProjects" type="boolean" jt="16" />
+			<column name="refreshToken" type="string" jt="12" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_Student" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<index name="idx_Student_email" unique="UNIQUE" >
+				<column name="email" />
+			</index>
+			<index name="idx_Student_enrollment" unique="UNIQUE" >
+				<column name="enrollment" />
+			</index>
+			<index name="idx_Student_academic" unique="NORMAL" >
+				<column name="course" />
+				<column name="stream" />
+				<column name="branch" />
+				<column name="batch" />
+			</index>
+		</table>
+
+		<!-- ADMIN MODEL -->
+		<table name="Admin" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="fullName" type="string" jt="12" mandatory="y" />
+			<column name="password" type="string" jt="12" mandatory="y" />
+			<column name="email" type="string" jt="12" mandatory="y" />
+			<column name="phone" type="string" jt="12" />
+			<column name="collegeId" type="string" jt="12" />
+			<column name="subjects" type="array" jt="2003" />
+			<column name="role" type="string" jt="12" />
+			<column name="refreshToken" type="string" jt="12" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_Admin" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<index name="idx_Admin_email" unique="UNIQUE" >
+				<column name="email" />
+			</index>
+		</table>
+
+		<!-- METRIC MODEL -->
+		<table name="Metric" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="name" type="string" jt="12" mandatory="y" />
+			<column name="slug" type="string" jt="12" mandatory="y" />
+			<column name="parentId" type="objectId" length="24" decimal="0" jt="-4" />
+			<column name="ancestors" type="array" jt="2003" />
+			<column name="isActive" type="boolean" jt="16" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_Metric" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<index name="idx_Metric_slug" unique="UNIQUE" >
+				<column name="slug" />
+			</index>
+			<fk name="fk_Metric_Parent" to_schema="placement_engine" to_table="Metric" >
+				<fk_column name="parentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- QUESTION MODEL -->
+		<table name="Question" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="subjectId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="category" type="string" jt="12" />
+			<column name="subCategory" type="string" jt="12" />
+			<column name="topic" type="string" jt="12" />
+			<column name="tags" type="array" jt="2003" />
+			<column name="problemStatement" type="string" jt="12" />
+			<column name="difficulty" type="string" jt="12" />
+			<column name="metrics" type="array" jt="2003" />
+			<column name="allocatedMark" type="double" jt="8" mandatory="y" />
+			<column name="negativeMarks" type="double" jt="8" />
+			<column name="questionType" type="string" jt="12" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_Question" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_Question_Subject" to_schema="placement_engine" to_table="Subject" >
+				<fk_column name="subjectId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- ASSESSMENT ATTEMPT MODEL -->
+		<table name="AssessmentAttempt" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="assessmentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="status" type="string" jt="12" />
+			<column name="startedAt" type="date" jt="91" />
+			<column name="submittedAt" type="date" jt="91" />
+			<column name="obtainedMarks" type="double" jt="8" />
+			<column name="totalMarks" type="double" jt="8" />
+			<column name="percentage" type="double" jt="8" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_AssessmentAttempt" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_AssessmentAttempt_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+			<fk name="fk_AssessmentAttempt_Test" to_schema="placement_engine" to_table="Test" >
+				<fk_column name="assessmentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- ANSWER MODEL -->
+		<table name="Answer" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="attemptId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="questionId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="response" type="object" jt="2000" />
+			<column name="isCorrect" type="boolean" jt="16" mandatory="y" />
+			<column name="marksObtained" type="double" jt="8" />
+			<column name="timeTakenMs" type="int" jt="4" />
+			<column name="answeredAt" type="date" jt="91" />
+			<index name="pk_Answer" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_Answer_Attempt" to_schema="placement_engine" to_table="AssessmentAttempt" >
+				<fk_column name="attemptId" pk="_id" />
+			</fk>
+			<fk name="fk_Answer_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+			<fk name="fk_Answer_Question" to_schema="placement_engine" to_table="Question" >
+				<fk_column name="questionId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- STUDENT METRIC PERFORMANCE MODEL -->
+		<table name="StudentMetricPerformance" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="metricId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="period" type="object" jt="2000" mandatory="y" />
+			<column name="questionsAttempted" type="int" jt="4" />
+			<column name="questionsCorrect" type="int" jt="4" />
+			<column name="obtainedMarks" type="double" jt="8" />
+			<column name="totalMarks" type="double" jt="8" />
+			<column name="accuracy" type="double" jt="8" />
+			<column name="percentage" type="double" jt="8" />
+			<column name="attemptsCount" type="int" jt="4" />
+			<column name="lastAttemptAt" type="date" jt="91" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_StudentMetricPerformance" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<index name="idx_StudentMetricPerformance_Unique" unique="UNIQUE" >
+				<column name="studentId" />
+				<column name="metricId" />
+				<column name="period" />
+			</index>
+			<fk name="fk_StudentMetricPerformance_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+			<fk name="fk_StudentMetricPerformance_Metric" to_schema="placement_engine" to_table="Metric" >
+				<fk_column name="metricId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- RANKING SNAPSHOT MODEL -->
+		<table name="RankingSnapshot" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="metricId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="scope" type="object" jt="2000" mandatory="y" />
+			<column name="period" type="object" jt="2000" mandatory="y" />
+			<column name="score" type="double" jt="8" mandatory="y" />
+			<column name="rank" type="int" jt="4" mandatory="y" />
+			<column name="totalParticipants" type="int" jt="4" mandatory="y" />
+			<column name="calculatedAt" type="date" jt="91" />
+			<column name="version" type="int" jt="4" />
+			<index name="pk_RankingSnapshot" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_RankingSnapshot_Metric" to_schema="placement_engine" to_table="Metric" >
+				<fk_column name="metricId" pk="_id" />
+			</fk>
+			<fk name="fk_RankingSnapshot_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- SCORING PROFILE MODEL -->
+		<table name="ScoringProfile" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="name" type="string" jt="12" mandatory="y" />
+			<column name="isDefault" type="boolean" jt="16" />
+			<column name="weights" type="array" jt="2003" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_ScoringProfile" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+		</table>
+
+		<!-- STUDENT STATS MODEL -->
+		<table name="StudentStats" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="totalTests" type="int" jt="4" />
+			<column name="totalAttempts" type="int" jt="4" />
+			<column name="totalTimeSpent" type="int" jt="4" />
+			<column name="avgScore" type="double" jt="8" />
+			<column name="overallAccuracy" type="double" jt="8" />
+			<column name="bestRank" type="int" jt="4" />
+			<column name="Percentile" type="double" jt="8" />
+			<column name="ranking" type="object" jt="2000" />
+			<column name="categoryStats" type="object" jt="2000" />
+			<column name="subCategoryStats" type="object" jt="2000" />
+			<column name="tagStats" type="object" jt="2000" />
+			<column name="difficultyStats" type="object" jt="2000" />
+			<column name="performanceTrends" type="object" jt="2000" />
+			<column name="lastComputed" type="date" jt="91" />
+			<index name="pk_StudentStats" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_StudentStats_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- CODING RANKINGS MODEL -->
+		<table name="CodingRankings" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="globalRank" type="int" jt="4" />
+			<column name="branch" type="string" jt="12" />
+			<column name="branchRank" type="int" jt="4" />
+			<column name="batch" type="string" jt="12" />
+			<column name="batchRank" type="int" jt="4" />
+			<column name="score" type="double" jt="8" />
+			<column name="problemsSolved" type="int" jt="4" />
+			<column name="easySolved" type="int" jt="4" />
+			<column name="mediumSolved" type="int" jt="4" />
+			<column name="hardSolved" type="int" jt="4" />
+			<column name="lastUpdated" type="date" jt="91" />
+			<index name="pk_CodingRankings" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_CodingRankings_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- TREND ANALYSIS MODEL -->
+		<table name="TrendAnalysis" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="date" type="date" jt="91" mandatory="y" />
+			<column name="metrics" type="object" jt="2000" />
+			<column name="subjectBreakdown" type="object" jt="2000" />
+			<column name="engagementScore" type="double" jt="8" />
+			<index name="pk_TrendAnalysis" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_TrendAnalysis_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- RANK HISTORY MODEL -->
+		<table name="RankHistory" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="rank" type="int" jt="4" />
+			<column name="score" type="double" jt="8" />
+			<column name="recordedAt" type="date" jt="91" />
+			<index name="pk_RankHistory" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_RankHistory_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- SUBJECT RANK HISTORY MODEL -->
+		<table name="SubjectRankHistory" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="subjectId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="rank" type="int" jt="4" />
+			<column name="recordedAt" type="date" jt="91" />
+			<index name="pk_SubjectRankHistory" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_SubjectRankHistory_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+			<fk name="fk_SubjectRankHistory_Subject" to_schema="placement_engine" to_table="Subject" >
+				<fk_column name="subjectId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- STUDENT PROJECT MODEL -->
+		<table name="StudentProject" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="title" type="string" jt="12" mandatory="y" />
+			<column name="description" type="string" jt="12" />
+			<column name="projectUrl" type="string" jt="12" />
+			<column name="githubUrl" type="string" jt="12" />
+			<column name="techStack" type="array" jt="2003" />
+			<column name="score" type="double" jt="8" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_StudentProject" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_StudentProject_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- PROJECT CONTRIBUTOR MODEL -->
+		<table name="ProjectContributor" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="projectId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="role" type="string" jt="12" />
+			<index name="pk_ProjectContributor" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_ProjectContributor_Project" to_schema="placement_engine" to_table="StudentProject" >
+				<fk_column name="projectId" pk="_id" />
+			</fk>
+			<fk name="fk_ProjectContributor_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- QUERY MESSAGE MODEL -->
+		<table name="QueryMessage" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="subject" type="string" jt="12" />
+			<column name="message" type="string" jt="12" />
+			<column name="status" type="string" jt="12" />
+			<column name="response" type="string" jt="12" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_QueryMessage" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_QueryMessage_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- SOCIAL LINKS MODEL -->
+		<table name="SocialLinks" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="github" type="string" jt="12" />
+			<column name="linkedin" type="string" jt="12" />
+			<column name="leetcode" type="string" jt="12" />
+			<column name="gfg" type="string" jt="12" />
+			<index name="pk_SocialLinks" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_SocialLinks_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- OPTION MODEL -->
+		<table name="Option" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="optionText" type="string" jt="12" mandatory="y" />
+			<column name="isCorrect" type="boolean" jt="16" />
+			<index name="pk_Option" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+		</table>
+
+		<!-- RESOURCE MODEL -->
+		<table name="Resource" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="title" type="string" jt="12" mandatory="y" />
+			<column name="url" type="string" jt="12" />
+			<column name="type" type="string" jt="12" />
+			<column name="subjectId" type="objectId" length="24" decimal="0" jt="-4" />
+			<column name="createdAt" type="date" jt="91" />
+			<index name="pk_Resource" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_Resource_Subject" to_schema="placement_engine" to_table="Subject" >
+				<fk_column name="subjectId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- TEST MODEL -->
+		<table name="Test" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="title" type="string" jt="12" mandatory="y" />
+			<column name="description" type="string" jt="12" />
+			<column name="duration" type="int" jt="4" />
+			<column name="totalMarks" type="double" jt="8" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_Test" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+		</table>
+
+		<!-- SUBJECT MODEL -->
+		<table name="Subject" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="name" type="string" jt="12" mandatory="y" />
+			<column name="code" type="string" jt="12" />
+			<column name="createdAt" type="date" jt="91" />
+			<column name="updatedAt" type="date" jt="91" />
+			<index name="pk_Subject" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+		</table>
+
+		<!-- TEST SESSION MODEL -->
+		<table name="TestSession" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="studentId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="testId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="status" type="string" jt="12" />
+			<column name="startedAt" type="date" jt="91" />
+			<index name="pk_TestSession" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_TestSession_Student" to_schema="placement_engine" to_table="Student" >
+				<fk_column name="studentId" pk="_id" />
+			</fk>
+			<fk name="fk_TestSession_Test" to_schema="placement_engine" to_table="Test" >
+				<fk_column name="testId" pk="_id" />
+			</fk>
+		</table>
+
+		<!-- TEST META MODEL -->
+		<table name="TestMeta" >
+			<column name="_id" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="testId" type="objectId" length="24" decimal="0" jt="-4" mandatory="y" />
+			<column name="instructions" type="string" jt="12" />
+			<column name="totalQuestions" type="int" jt="4" />
+			<index name="pk_TestMeta" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_TestMeta_Test" to_schema="placement_engine" to_table="Test" >
+				<fk_column name="testId" pk="_id" />
+			</fk>
+		</table>
+	</schema>
+
+	<layout name="Placement Engine Complete ERD Layout" id="Layout-placement-engine" show_relation="columns" >
+		<entity schema="placement_engine" name="Student" x="60" y="80" />
+		<entity schema="placement_engine" name="Admin" x="320" y="80" />
+		<entity schema="placement_engine" name="Metric" x="580" y="80" />
+		<entity schema="placement_engine" name="Question" x="840" y="80" />
+		<entity schema="placement_engine" name="AssessmentAttempt" x="60" y="520" />
+		<entity schema="placement_engine" name="Answer" x="320" y="520" />
+		<entity schema="placement_engine" name="StudentMetricPerformance" x="580" y="520" />
+		<entity schema="placement_engine" name="RankingSnapshot" x="840" y="520" />
+		<entity schema="placement_engine" name="ScoringProfile" x="1100" y="80" />
+		<entity schema="placement_engine" name="StudentStats" x="60" y="920" />
+		<entity schema="placement_engine" name="CodingRankings" x="320" y="920" />
+		<entity schema="placement_engine" name="TrendAnalysis" x="580" y="920" />
+		<entity schema="placement_engine" name="RankHistory" x="840" y="920" />
+		<entity schema="placement_engine" name="SubjectRankHistory" x="1100" y="920" />
+		<entity schema="placement_engine" name="StudentProject" x="60" y="1320" />
+		<entity schema="placement_engine" name="ProjectContributor" x="320" y="1320" />
+		<entity schema="placement_engine" name="QueryMessage" x="580" y="1320" />
+		<entity schema="placement_engine" name="SocialLinks" x="840" y="1320" />
+		<entity schema="placement_engine" name="Option" x="1100" y="520" />
+		<entity schema="placement_engine" name="Resource" x="1100" y="1320" />
+		<entity schema="placement_engine" name="Test" x="1360" y="80" />
+		<entity schema="placement_engine" name="Subject" x="1360" y="520" />
+		<entity schema="placement_engine" name="TestSession" x="1360" y="920" />
+		<entity schema="placement_engine" name="TestMeta" x="1360" y="1320" />
+	</layout>
+</project>

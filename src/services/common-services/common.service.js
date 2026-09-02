@@ -6,6 +6,7 @@ import { uploadOnCloudinary } from "../../utils/Cloudinary.js";
 import { Question } from "../../models/test-models/questions.models.js";
 import { TestMeta } from "../../models/test-models/TestMeta.models.js";
 import { Subject } from "../../models/test-models/subject.models.js";
+import { Option } from "../../models/test-models/option.models.js";
 
 // Utility to get the correct model based on role
 const getUserModel = (role) => {

@@ -11,7 +11,17 @@ const testAttemptSchema = new mongoose.Schema({
     ref: 'Test',
     required: true,
   },
+  testCategory: {
+    type: String,
+    enum: ["MCQ", "Coding", "Essay", "Descriptive", "Hybrid"],
+    default: "MCQ",
+    index: true,
+  },
   testScore: {
+    type: Number,
+    default: 0,
+  },
+  maxScore: {
     type: Number,
     default: 0,
   },
@@ -21,7 +31,7 @@ const testAttemptSchema = new mongoose.Schema({
   },
   attemptCount:{
     type:Number,
-    default:0
+    default:1
   },
   attemptDate: {
     type: Date,
@@ -30,7 +40,7 @@ const testAttemptSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["pending", "submitted", "evaluated"],
-    default: "pending",
+    default: "submitted",
   },
   totalQuestions: {
     type: Number,
@@ -48,12 +58,25 @@ const testAttemptSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  answers: [
+    {
+      questionId: { type: mongoose.Schema.Types.ObjectId, ref: "Question" },
+      category: { type: String, enum: ["MCQ", "Coding", "Essay", "Descriptive"], default: "MCQ" },
+      selectedAnswer: mongoose.Schema.Types.Mixed,
+      isCorrect: { type: Boolean, default: false },
+      scoreObtained: { type: Number, default: 0 },
+      maxMarks: { type: Number, default: 0 },
+      timeTaken: { type: Number, default: 0 }, // in seconds
+      difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" }
+    }
+  ],
   subjectScores:[
     {
       subjectId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Subject'  
       },
+      subjectName: { type: String },
       scoreObtained:{
         type:Number,
         default:0
@@ -67,7 +90,17 @@ const testAttemptSchema = new mongoose.Schema({
         default:0
       }
     }
-  ]
+  ],
+  categoryScores: {
+    type: Map,
+    of: new mongoose.Schema({
+      scoreObtained: { type: Number, default: 0 },
+      maxMarks: { type: Number, default: 0 },
+      correct: { type: Number, default: 0 },
+      total: { type: Number, default: 0 }
+    }, { _id: false }),
+    default: {}
+  }
 }, { timestamps: true });
 
 // Add indexes to optimize queries

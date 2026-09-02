@@ -8,7 +8,7 @@ const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // cors config
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true
 }))
 // for limit of data transfer
@@ -29,13 +29,15 @@ app.use(cookieParser())
 import commonRouter from "./routes/common-routes/common.routes.js";
 import adminRouter from "./routes/admin-routes/admin.routes.js";
 import studentRouter from "./routes/student-routes/student.routes.js";
-// import testRouter from "./routes/test-routes/test.routes.js";
 import practiceSolutionRouter from "./routes/practice-routes/practice-solution.routes.js";
+import metricRouter from "./routes/metric-routes/metric.routes.js";
+import analyticsRouter from "./routes/analytics-routes/analytics.routes.js";
 
 // starting of any api
 app.use('/api/v1/admin', adminRouter)
 app.use('/api/v1/student', studentRouter)
 app.use('/api/v1/user/auth', commonRouter)
 app.use('/api/v1/practice', practiceSolutionRouter)
-// app.use('/api/v1/test', testRouter)
+app.use('/api/v1/metrics', metricRouter)
+app.use('/api/v1/analytics', analyticsRouter)
 export { app }

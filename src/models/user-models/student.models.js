@@ -39,13 +39,25 @@ const studentSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    course: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+    stream: {
+      type: String,
+      trim: true,
+      index: true,
+    },
     branch: {
       type: String,
-      default: "N/A",
+      trim: true,
+      index: true,
     },
     batch: {
       type: String,
-      default: null,
+      trim: true,
+      index: true,
     },
     role: {
       type: String,

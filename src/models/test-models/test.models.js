@@ -33,7 +33,12 @@ const testSchema = new mongoose.Schema({
     required: true,
     default: 30,
   },
-  // Meta information (questions, totals, stats) moved to TestMeta
+  problems: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Question",
+    },
+  ],
   validTill: {
     type: Date,
     required: true,
