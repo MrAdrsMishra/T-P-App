@@ -41,6 +41,5 @@ const MetricSchema = new mongoose.Schema(
 );
 
 MetricSchema.index({ ancestors: 1, isActive: 1 });
-MetricSchema.index({ parentId: 1 });
 
 export const Metric = mongoose.model("Metric", MetricSchema);
