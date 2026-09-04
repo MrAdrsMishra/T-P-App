@@ -209,10 +209,22 @@ export const getRankings = async ({
     "period.key": period.key,
   };
 
+  let count = await RankingSnapshot.countDocuments(query);
+  if (count === 0 && metricId) {
+    // Dynamically calculate snapshots if not precomputed
+    await calculateRankingSnapshots({
+      metricId,
+      scopeType,
+      scopeId,
+      period,
+    });
+    count = await RankingSnapshot.countDocuments(query);
+  }
+
   if (rankFrom !== undefined || rankTo !== undefined) {
     query.rank = {};
-    if (rankFrom !== undefined) query.rank.$gte = Number(rankFrom);
-    if (rankTo !== undefined) query.rank.$lte = Number(rankTo);
+    if (rankFrom !== undefined && rankFrom !== null && rankFrom !== "") query.rank.$gte = Number(rankFrom);
+    if (rankTo !== undefined && rankTo !== null && rankTo !== "") query.rank.$lte = Number(rankTo);
   }
 
   const skip = (Number(page) - 1) * Number(limit);
@@ -227,17 +239,29 @@ export const getRankings = async ({
     })
     .populate({
       path: "metricId",
-      select: "name slug",
+      select: "name slug type",
     })
     .lean();
 
   const total = await RankingSnapshot.countDocuments(query);
 
+  const rankingsWithPercentile = snapshots.map((s) => {
+    const totalP = s.totalParticipants || 1;
+    const percentile = totalP > 1
+      ? Math.round((((totalP - s.rank + 1) / totalP) * 100) * 10) / 10
+      : 100;
+    return {
+      ...s,
+      percentile,
+    };
+  });
+
   return {
-    rankings: snapshots,
+    rankings: rankingsWithPercentile,
     total,
     page: Number(page),
     limit: Number(limit),
     totalPages: Math.ceil(total / limit),
   };
 };
+

@@ -138,7 +138,7 @@ const registerStudentService = async (students) => {
   const existing = await Student.find({
     $or: [
       { email: { $in: emails } },
-      { fullName: { $in: fullNames } },
+      // { fullName: { $in: fullNames } },
       { enrollment: { $in: enrollments } },
     ],
   });

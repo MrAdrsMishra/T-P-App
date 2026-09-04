@@ -40,4 +40,19 @@ app.use('/api/v1/user/auth', commonRouter)
 app.use('/api/v1/practice', practiceSolutionRouter)
 app.use('/api/v1/metrics', metricRouter)
 app.use('/api/v1/analytics', analyticsRouter)
+
+// Global Express Error Handling Middleware
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  return res.status(statusCode).json({
+    statusCode,
+    success: false,
+    message,
+    stack: err.stack,
+    data: err.data || null,
+    errors: err.errors || [],
+  });
+});
+
 export { app }

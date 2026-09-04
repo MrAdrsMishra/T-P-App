@@ -10,4 +10,4 @@ const optionSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-export const Option = mongoose.model("Option", optionSchema);
+export const Option = mongoose.model("Option", optionSchema)
